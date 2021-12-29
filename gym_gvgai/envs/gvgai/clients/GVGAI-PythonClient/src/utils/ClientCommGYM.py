@@ -6,7 +6,8 @@ import random
 import tempfile
 import shutil
 
-from scipy import misc
+# from scipy import misc
+import imageio
 
 import subprocess
 import argparse
@@ -36,7 +37,7 @@ class ClientCommGYM:
         self.player = None
         self.global_ect = None
         self.lastSsoType = LEARNING_SSO_TYPE.JSON
-        
+
         self.sso.Terminal=False
 
         baseDir = os.path.join(pathStr, 'gvgai')
@@ -87,14 +88,14 @@ class ClientCommGYM:
             self.line = self.io.readLine()
             self.line = self.line.rstrip("\r\n")
             self.processLine(self.line)
-            
+
             score = self.reward()
             self.lastScore=self.sso.gameScore
         else:
             score=0
-        
+
         if self.sso.isGameOver==True or self.sso.gameWinner=='PLAYER_WINS' or self.sso.phase == "FINISH" or self.sso.phase=="ABORT" or self.sso.phase=="End":
-            self.sso.image = misc.imread(os.path.join(self.tempDir.name, 'gameStateByBytes.png'))
+            self.sso.image = imageio.imread(os.path.join(self.tempDir.name, 'gameStateByBytes.png'))
             self.sso.Terminal=True
             #self.lastScore=0
             #Score = self.lastScore
@@ -102,36 +103,36 @@ class ClientCommGYM:
         else:
             self.sso.Terminal=False
             actions=self.actions()
-        
-      
-        info = {'winner': self.sso.gameWinner, 'actions': self.actions()}  
+
+
+        info = {'winner': self.sso.gameWinner, 'actions': self.actions()}
         return self.sso.image, score, self.sso.Terminal, info
 
     def reset(self, lvl):
         #flag=True
         #self.line = ''
         self.lastScore=0
-        
+
         if hasattr(self,'line'):
             flag=True
             restart=True
-            
+
             #self.io.writeToServer(self.lastMessageId, "END_TRAINING", self.LOG)
-            
+
             #self.line = self.io.readLine()
             #self.line = self.line.rstrip("\r\n")
             #self.processLine(self.line)
-            
+
             if self.sso.Terminal:
                 self.io.writeToServer(self.lastMessageId, str(lvl) + "#" + self.lastSsoType, self.LOG)
             else:
-            
+
                 self.io.writeToServer(self.lastMessageId, "END_OVERSPENT", self.LOG)
-            
+
                 self.line = self.io.readLine()
                 self.line = self.line.rstrip("\r\n")
                 self.processLine(self.line)
-            
+
                 self.io.writeToServer(self.lastMessageId, str(lvl) + "#" + self.lastSsoType, self.LOG)
 
         else:
@@ -158,9 +159,9 @@ class ClientCommGYM:
                 self.init()
 
             elif self.sso.phase == "ACT":
-                flag=False                
-                
-                
+                flag=False
+
+
                 for i in range(1):
                     self.act(0)
                     self.line = self.io.readLine()
@@ -172,13 +173,13 @@ class ClientCommGYM:
                 #print(dir(self.sso))
 
                 if(self.sso.isGameOver==True or self.sso.gameWinner=='WINNER' or self.sso.phase == "FINISH" or self.sso.phase == "End"):
-                    
-                    self.sso.image = misc.imread(os.path.join(self.tempDir.name, 'gameStateByBytes.png'))
+
+                    self.sso.image = imageio.imread(os.path.join(self.tempDir.name, 'gameStateByBytes.png'))
                     self.sso.Terminal=True
                     self.lastScore=0
                 else:
                     self.sso.Terminal=False
-                
+
 
         return self.sso.image
 
@@ -302,7 +303,7 @@ class ClientCommGYM:
                         or self.lastSsoType == LEARNING_SSO_TYPE.BOTH or self.lastSsoType == "BOTH"):
                     if(self.sso.imageArray):
                         self.sso.convertBytesToPng(self.sso.imageArray, self.tempDir.name)
-                        self.sso.image = misc.imread(os.path.join(self.tempDir.name, 'gameStateByBytes.png'))
+                        self.sso.image = imageio.imread(os.path.join(self.tempDir.name, 'gameStateByBytes.png'))
 
         except Exception as e:
             logging.exception(e)
