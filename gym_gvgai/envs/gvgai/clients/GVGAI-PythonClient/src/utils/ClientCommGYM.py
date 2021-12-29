@@ -6,7 +6,6 @@ import random
 import tempfile
 import shutil
 
-# from scipy import misc
 import imageio
 
 import subprocess
